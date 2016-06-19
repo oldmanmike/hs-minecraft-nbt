@@ -9,6 +9,18 @@ cache:
   directories:
     - $HOME/.stack/
 
+matrix:
+  include:
+    - env: GHCVER=head STACK_YAML=stack.yaml
+      addons:
+        apt:
+          sources:
+            -hvr-ghc
+          packages:
+            - ghc-head
+  allow_failures:
+    - env: GHCVER=head STACK_YAML=stack.yaml
+
 before_install:
   - mkdir -p ~/.local/bin
   - export PATH=~/.local/bin:$PATH
@@ -20,9 +32,8 @@ before_install:
 
 
 install:
-  - stack setup
-  - stack build
+  - stack --no-terminal --skip-ghc-check setup
+  - stack --no-terminal --skip-ghc-check build
 
 script:
-  - stack test
-  - stack bench
+  - stack --no-terminal --skip-ghc-check test
