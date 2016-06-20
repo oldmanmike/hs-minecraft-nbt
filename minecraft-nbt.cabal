@@ -17,6 +17,7 @@ library
   hs-source-dirs:       src
   exposed-modules:      Data.NBT
                         Data.NBT.Decode
+                        Data.NBT.Encode
                         Data.NBT.Types
   build-depends:        array,
                         attoparsec,
