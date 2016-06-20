@@ -16,7 +16,9 @@ cabal-version:          >=1.10
 library
   hs-source-dirs:       src
   exposed-modules:      Data.NBT
-  build-depends:        attoparsec,
+                        Data.NBT.Types
+  build-depends:        array,
+                        attoparsec,
                         base >= 4.7 && < 5,
                         bytestring,
                         deepseq,
