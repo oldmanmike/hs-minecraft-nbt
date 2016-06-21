@@ -1,9 +1,15 @@
 module Data.NBT.Encode
   ( encodeNBT
+  , encodeText
+  , encodeByteArray
+  , encodeList
+  , encodeCompound
+  , encodeIntArray
   ) where
 
 import qualified  Data.Array.IArray as A
 import qualified  Data.Array.Unboxed as AU
+import qualified  Data.ByteString as B
 import qualified  Data.ByteString.Builder as Encode
 import            Data.Int
 import            Data.List
@@ -48,8 +54,7 @@ encodeNBT (TagDouble name payload) =
 encodeNBT (TagByteArray name payload) =
   Encode.word8 0x07
   <> encodeText name
-  <> (Encode.int32BE $ (\(a,b) -> toEnum . fromEnum $ b - a) $ (AU.bounds payload))
-  <> (foldl' (<>) mempty (fmap Encode.int8 (AU.elems payload)))
+  <> encodeByteArray payload
 
 encodeNBT (TagString name payload) =
   Encode.word8 0x08
@@ -59,21 +64,39 @@ encodeNBT (TagString name payload) =
 encodeNBT (TagList name payload) =
   Encode.word8 0x09
   <> encodeText name
-  <> (Encode.int32BE . (\(a,b) -> toEnum . fromEnum $ b - a) $ (A.bounds payload))
-  <> foldl' (<>) mempty (fmap Encode.int8 payload)
+  <> encodeList payload
 
 encodeNBT (TagCompound name payload) =
   Encode.word8 0x0a
   <> encodeText name
-  <> (foldl' (<>) mempty (fmap encodeNBT payload))
+  <> encodeCompound payload
 
 encodeNBT (TagIntArray name payload) =
   Encode.word8 0x0b
   <> encodeText name
-  <> (Encode.int32BE . (\(a,b) -> toEnum . fromEnum $ b - a) $ (A.bounds payload))
-  <> (foldl' (<>) mempty (fmap Encode.int32BE (AU.elems payload)))
+  <> encodeIntArray payload
+
+encodeByteArray :: (AU.UArray Int32 Int8) -> Encode.Builder
+encodeByteArray payload =
+  (Encode.int32BE $ (\(a,b) -> toEnum . fromEnum $ AU.rangeSize (a,b)) $ (AU.bounds payload))
+  <> (foldl' (<>) mempty (fmap Encode.int8 (AU.elems payload)))
 
 encodeText :: T.Text -> Encode.Builder
 encodeText t =
-  (Encode.int16BE . toEnum . T.length $ t)
-  <> encodeUtf8Builder t
+    (Encode.int16BE . toEnum . B.length $ t')
+    <> Encode.byteString t'
+  where
+  t' = encodeUtf8 t
+
+encodeList :: (A.Array Int32 Int8) -> Encode.Builder
+encodeList payload =
+  (Encode.int32BE . (\(a,b) -> toEnum . fromEnum $ A.rangeSize (a,b)) $ (A.bounds payload))
+  <> foldl' (<>) mempty (fmap Encode.int8 payload)
+
+encodeCompound :: [NBT] -> Encode.Builder
+encodeCompound payload = foldl' (<>) mempty (fmap encodeNBT payload)
+
+encodeIntArray :: (AU.UArray Int32 Int32) -> Encode.Builder
+encodeIntArray arr =
+  (Encode.int32BE . (\(a,b) -> toEnum . fromEnum $ AU.rangeSize (a,b)) $ (A.bounds arr))
+  <> (foldl' (<>) mempty (fmap Encode.int32BE (AU.elems arr)))

@@ -2,8 +2,20 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Data.NBT.Decode
   ( decodeNBT
+  , decodeInt8
+  , decodeInt16BE
+  , decodeInt32BE
+  , decodeInt64BE
+  , decodeFloatBE
+  , decodeDoubleBE
+  , decodeByteArray
+  , decodeText
+  , decodeList
+  , decodeCompound
+  , decodeIntArray
   ) where
 
+import            Control.Monad
 import            Control.Monad.ST
 import            Data.Array.ST (newArray, readArray, MArray, STUArray)
 import            Data.Array.Unboxed
@@ -23,19 +35,17 @@ decodeNBT :: Decode.Parser NBT
 decodeNBT = do
   tagTypeByte <- Decode.anyWord8
   case tagTypeByte of
-    0x01 -> TagByte <$> decodeText <*> decodeInt8
-    0x02 -> TagShort <$> decodeText <*> decodeInt16BE
-    0x03 -> TagInt <$> decodeText <*> decodeInt32BE
-    0x04 -> TagLong <$> decodeText <*> decodeInt64BE
-    0x05 -> TagFloat <$> decodeText <*> decodeFloatBE
-    0x06 -> TagDouble <$> decodeText <*> decodeDoubleBE
-    0x07 -> TagByteArray <$> decodeText <*> decodeByteArray
-    0x08 -> TagString <$> decodeText <*> decodeText
-    0x09 -> TagList <$> decodeText <*> decodeList
-    0x0a -> TagCompound <$> decodeText <*> decodeCompound
-    0x0b -> TagIntArray <$> decodeText <*> decodeIntArray
-    _    -> undefined
-
+    0x01 -> TagByte <$!> decodeText <*> decodeInt8
+    0x02 -> TagShort <$!> decodeText <*> decodeInt16BE
+    0x03 -> TagInt <$!> decodeText <*> decodeInt32BE
+    0x04 -> TagLong <$!> decodeText <*> decodeInt64BE
+    0x05 -> TagFloat <$!> decodeText <*> decodeFloatBE
+    0x06 -> TagDouble <$!> decodeText <*> decodeDoubleBE
+    0x07 -> TagByteArray <$!> decodeText <*> decodeByteArray
+    0x08 -> TagString <$!> decodeText <*> decodeText
+    0x09 -> TagList <$!> decodeText <*> decodeList
+    0x0a -> TagCompound <$!> decodeText <*> decodeCompound
+    0x0b -> TagIntArray <$!> decodeText <*> decodeIntArray
 
 decodeWord16BE :: Decode.Parser Word16
 decodeWord16BE = do
@@ -136,7 +146,7 @@ decodeByteArray = do
 
 decodeText :: Decode.Parser T.Text
 decodeText = do
-  ln <- fmap fromEnum decodeInt32BE
+  ln <- fmap fromIntegral decodeInt16BE
   if ln /= 0
     then fmap decodeUtf8 (Decode.take ln)
     else return ""
