@@ -108,7 +108,7 @@ encodeList (NBTList t payload) =
   <> foldl' (<>) mempty (fmap encodeNBT' payload)
 
 encodeCompound :: [NBT] -> Encode.Builder
-encodeCompound payload = foldl' (<>) mempty (fmap encodeNBT payload)
+encodeCompound payload = foldr (<>) (Encode.word8 0x00) (fmap encodeNBT payload)
 
 encodeIntArray :: (AU.UArray Int32 Int32) -> Encode.Builder
 encodeIntArray arr =
