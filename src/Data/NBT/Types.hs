@@ -2,6 +2,8 @@
 module Data.NBT.Types
   ( NBT (..)
   , TagType (..)
+  , NamelessNBT (..)
+  , NBTList (..)
   ) where
 
 import            Control.Applicative
@@ -20,10 +22,26 @@ data NBT
   | TagDouble     T.Text !Double
   | TagByteArray  T.Text !(UArray Int32 Int8)
   | TagString     T.Text !T.Text
-  | TagList       T.Text !(Array Int32 Int8)
+  | TagList       T.Text !NBTList
   | TagCompound   T.Text ![NBT]
   | TagIntArray   T.Text !(UArray Int32 Int32)
   deriving (Show,Eq,Typeable)
+
+data NamelessNBT
+  = NTagByte       !Int8
+  | NTagShort      !Int16
+  | NTagInt        !Int32
+  | NTagLong       !Int64
+  | NTagFloat      !Float
+  | NTagDouble     !Double
+  | NTagByteArray  !(UArray Int32 Int8)
+  | NTagString     !T.Text
+  | NTagList       !NBTList
+  | NTagCompound   ![NBT]
+  | NTagIntArray   !(UArray Int32 Int32)
+  deriving (Show,Eq,Typeable)
+
+data NBTList = NBTList TagType [NamelessNBT] deriving (Show,Eq)
 
 data TagType
   = TypeEnd

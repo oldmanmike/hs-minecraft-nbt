@@ -29,7 +29,7 @@ import qualified  Data.Text as T
 import            Data.Text.Encoding
 import            Data.Word
 
-import            Data.NBT.Types (NBT(..))
+import            Data.NBT.Types
 
 decodeNBT :: Decode.Parser NBT
 decodeNBT = do
@@ -46,6 +46,21 @@ decodeNBT = do
     0x09 -> TagList <$!> decodeText <*> decodeList
     0x0a -> TagCompound <$!> decodeText <*> decodeCompound
     0x0b -> TagIntArray <$!> decodeText <*> decodeIntArray
+
+decodeNBT' :: TagType -> Decode.Parser NamelessNBT
+decodeNBT' t = do
+  case t of
+    TypeByte -> NTagByte <$!> decodeInt8
+    TypeShort -> NTagShort <$!> decodeInt16BE
+    TypeInt -> NTagInt <$!> decodeInt32BE
+    TypeLong -> NTagLong <$!> decodeInt64BE
+    TypeFloat -> NTagFloat <$!> decodeFloatBE
+    TypeDouble -> NTagDouble <$!> decodeDoubleBE
+    TypeByteArray -> NTagByteArray <$!> decodeByteArray
+    TypeString -> NTagString <$!> decodeText
+    TypeList -> NTagList <$!> decodeList
+    TypeCompound -> NTagCompound <$!> decodeCompound
+    TypeIntArray -> NTagIntArray <$!> decodeIntArray
 
 decodeWord16BE :: Decode.Parser Word16
 decodeWord16BE = do
@@ -152,15 +167,16 @@ decodeText = do
     else return ""
 {-# INLINE decodeText #-}
 
-decodeList :: Decode.Parser (Array Int32 Int8)
+decodeList :: Decode.Parser NBTList
 decodeList = do
+  t <- Decode.anyWord8
   i <- decodeInt32BE
-  lst <- Decode.count (fromEnum i) decodeInt8
-  return $ array (0,(i-1)) (zip (range (0,(i-1))) lst)
+  lst <- Decode.count (fromEnum i) (decodeNBT' (toEnum . fromEnum $ t))
+  return $ NBTList (toEnum . fromEnum $ t) lst
 {-# INLINE decodeList #-}
 
 decodeCompound :: Decode.Parser [NBT]
-decodeCompound = Decode.many' decodeNBT
+decodeCompound = Decode.manyTill' decodeNBT (Decode.word8 0x00)
 {-# INLINE decodeCompound #-}
 
 decodeIntArray :: Decode.Parser (UArray Int32 Int32)

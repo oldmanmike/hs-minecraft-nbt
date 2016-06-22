@@ -18,7 +18,7 @@ import qualified  Data.Text as T
 import            Data.Text.Encoding
 import            Data.Word
 
-import            Data.NBT.Types (NBT(..))
+import            Data.NBT.Types
 
 encodeNBT :: NBT -> Encode.Builder
 encodeNBT (TagByte name payload) =
@@ -76,6 +76,19 @@ encodeNBT (TagIntArray name payload) =
   <> encodeText name
   <> encodeIntArray payload
 
+encodeNBT' :: NamelessNBT -> Encode.Builder
+encodeNBT' (NTagByte payload)       = Encode.int8 payload
+encodeNBT' (NTagShort payload)      = Encode.int16BE payload
+encodeNBT' (NTagInt payload)        = Encode.int32BE payload
+encodeNBT' (NTagLong payload)       = Encode.int64BE payload
+encodeNBT' (NTagFloat payload)      = Encode.floatBE payload
+encodeNBT' (NTagDouble payload)     = Encode.doubleBE payload
+encodeNBT' (NTagByteArray payload)  = encodeByteArray payload
+encodeNBT' (NTagString payload)     = encodeText payload
+encodeNBT' (NTagList payload)       = encodeList payload
+encodeNBT' (NTagCompound payload)   = encodeCompound payload
+encodeNBT' (NTagIntArray payload)   = encodeIntArray payload
+
 encodeByteArray :: (AU.UArray Int32 Int8) -> Encode.Builder
 encodeByteArray payload =
   (Encode.int32BE $ (\(a,b) -> toEnum . fromEnum $ AU.rangeSize (a,b)) $ (AU.bounds payload))
@@ -88,10 +101,11 @@ encodeText t =
   where
   t' = encodeUtf8 t
 
-encodeList :: (A.Array Int32 Int8) -> Encode.Builder
-encodeList payload =
-  (Encode.int32BE . (\(a,b) -> toEnum . fromEnum $ A.rangeSize (a,b)) $ (A.bounds payload))
-  <> foldl' (<>) mempty (fmap Encode.int8 payload)
+encodeList :: NBTList -> Encode.Builder
+encodeList (NBTList t payload) =
+  (Encode.word8 . toEnum . fromEnum $ t)
+  <> (Encode.int32BE . toEnum $ length payload)
+  <> foldl' (<>) mempty (fmap encodeNBT' payload)
 
 encodeCompound :: [NBT] -> Encode.Builder
 encodeCompound payload = foldl' (<>) mempty (fmap encodeNBT payload)
