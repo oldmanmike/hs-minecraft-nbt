@@ -54,7 +54,7 @@ instance Arbitrary NBT where
               0x07 -> TagByteArray <$> arbitrary <*> arbitrary
               0x08 -> TagString <$> arbitrary <*> arbitrary
               0x09 -> TagList <$> arbitrary <*> arbitrary
-              0x0a -> TagCompound <$> arbitrary <*> arbitrary
+              0x0a -> TagCompound <$> arbitrary <*> vectorOf (n `div` 20) arbitrary
               0x0b -> TagIntArray <$> arbitrary <*> arbitrary
 
 instance Arbitrary NBTList where
@@ -70,11 +70,11 @@ instance Arbitrary NBTList where
               0x04 -> NBTList <$> return TypeLong <*> vectorOf i (NTagLong <$> (arbitrary :: Gen Int64))
               0x05 -> NBTList <$> return TypeFloat <*> vectorOf i (NTagFloat <$> (arbitrary :: Gen Float))
               0x06 -> NBTList <$> return TypeDouble <*> vectorOf i (NTagDouble <$> (arbitrary :: Gen Double))
-              0x07 -> NBTList <$> return TypeByteArray <*> vectorOf (n `div` 2) (NTagByteArray <$> (arbitrary :: Gen (AU.UArray Int32 Int8)))
+              0x07 -> NBTList <$> return TypeByteArray <*> vectorOf (n `div` 20) (NTagByteArray <$> (arbitrary :: Gen (AU.UArray Int32 Int8)))
               0x08 -> NBTList <$> return TypeString <*> vectorOf i (NTagString <$> (arbitrary :: Gen T.Text))
-              0x09 -> NBTList <$> return TypeList <*> vectorOf (n `div` 2) (NTagList <$> (resize 5 arbitrary))
-              0x0a -> NBTList <$> return TypeCompound <*> vectorOf (n `div` 2) (NTagCompound <$> vectorOf (n `div` 4) (arbitrary :: Gen NBT))
-              0x0b -> NBTList <$> return TypeIntArray <*> vectorOf (n `div` 2) (NTagIntArray <$> (arbitrary :: Gen (AU.UArray Int32 Int32)))
+              0x09 -> NBTList <$> return TypeList <*> vectorOf (n `div` 20) (NTagList <$> arbitrary)
+              0x0a -> NBTList <$> return TypeCompound <*> vectorOf (n `div` 20) (NTagCompound <$> vectorOf (n `div` 25) (arbitrary :: Gen NBT))
+              0x0b -> NBTList <$> return TypeIntArray <*> vectorOf (n `div` 20) (NTagIntArray <$> (arbitrary :: Gen (AU.UArray Int32 Int32)))
 
 checkIdentity :: Eq a => [a] -> (a -> Encode.Builder) -> (Decode.Parser a) -> Bool
 checkIdentity [] _ _ = True
