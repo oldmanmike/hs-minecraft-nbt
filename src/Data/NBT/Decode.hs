@@ -1,5 +1,16 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
+-------------------------------------------------------------------------------
+-- |
+-- Module       : Data.NBT.Decode
+-- Copyright    : (c) 2016 Michael Carpenter
+-- License      : BSD3
+-- Maintainer   : Michael Carpenter <oldmanmike.dev@gmail.com>
+-- Stability    : experimental
+-- Portability  : non-portable
+--
+-------------------------------------------------------------------------------
+
 module Data.NBT.Decode
   ( decodeNBT
   , decodeInt8
