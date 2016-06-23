@@ -17,6 +17,7 @@ before_install:
   - cd stack-0.1.6.0-linux-x86_64/
   - cp ./stack ~/.local/bin/
   - chmod a+x ~/.local/bin/stack
+  - stack upgrade --git
 
 
 install:
