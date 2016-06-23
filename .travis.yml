@@ -4,22 +4,10 @@ branches:
   only:
     - master
 
-sudo: false
+sudo: required
 cache:
   directories:
     - $HOME/.stack/
-
-matrix:
-  include:
-    - env: GHCVER=head STACK_YAML=stack.yaml
-      addons:
-        apt:
-          sources:
-            -hvr-ghc
-          packages:
-            - ghc-head
-  allow_failures:
-    - env: GHCVER=head STACK_YAML=stack.yaml
 
 before_install:
   - mkdir -p ~/.local/bin
@@ -32,8 +20,9 @@ before_install:
 
 
 install:
-  - stack --no-terminal --skip-ghc-check setup
-  - stack --no-terminal --skip-ghc-check build
+  - stack setup
+  - stack build
 
 script:
-  - stack --no-terminal --skip-ghc-check test
+  - stack test
+  - stack bench
