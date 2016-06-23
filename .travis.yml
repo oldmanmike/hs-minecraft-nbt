@@ -2,7 +2,7 @@ language: haskell
 
 branches:
   only:
-    - master
+    - travis-tweaking
 
 sudo: required
 cache:
