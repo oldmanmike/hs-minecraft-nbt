@@ -65,7 +65,7 @@ install:
      cabal)
        cabal --version;
        travis_retry cabal update;
-       cabal install --only-dependencies --force-reinstalls --ghc-options=-O0;;
+       cabal install --only-dependencies --disable-tests --disable-benchmarks --force-reinstalls --ghc-options=-O0;;
    esac
 
 script:
@@ -73,7 +73,6 @@ script:
      stack)
        stack --no-terminal test --bench --haddock --no-haddock-deps;;
      cabal)
-       cabal configure -v2 --ghc-options=-O0;
-       cabal build;
-       cabal test;;
+       cabal configure --disable-tests --disable-benchmarks -v2 --ghc-options=-O0;
+       cabal build;;
    esac
