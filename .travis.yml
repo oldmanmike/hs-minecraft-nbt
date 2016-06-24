@@ -47,33 +47,32 @@ matrix:
     - env: BUILD=stack GHCVER=head STACK_YAML=stack.yaml
 
 before_install:
-  - unset CC
-  - mkdir -p ~/.local/bin
-  - export PATH=~/.local/bin:$PATH
-  - travis_retry wget https://github.com/commercialhaskell/stack/releases/download/v1.1.2/stack-1.1.2-linux-x86_64.tar.gz
-  - tar xzf stack-1.1.2-linux-x86_64.tar.gz
-  - cd stack-1.1.2-linux-x86_64/
-  - cp ./stack ~/.local/bin/
-  - chmod a+x ~/.local/bin/stack
-  - export PATH=$HOME/.cabal/bin:$HOME/.local/bin:$PATH
-  - cd ..
+ - unset CC
+ - case "$BUILD" in
+     stack)
+       export PATH=$HOME/.local/bin:/opt/ghc/$GHCVER/bin:$PATH;;
+     cabal)
+       export PATH=$HOME/.cabal/bin:/opt/ghc/$GHCVER/bin:/opt/cabal/$CABALVER/bin:$PATH;;
+   esac
+ - ./.travis-setup.sh
 
 install:
-  - echo "$(ghc --version) [$(ghc --print-project-git-commit-id 2> /dev/null || echo '?')]"
-  - case "$BUILD" in
-      stack)
-       stack --no-terminal --install-ghc test --bench --only-dependencies;;
-      cabal)
+ - echo "$(ghc --version) [$(ghc --print-project-git-commit-id 2> /dev/null || echo '?')]"
+ - case "$BUILD" in
+     stack)
+       stack --no-terminal test --only-dependencies;;
+     cabal)
        cabal --version;
        travis_retry cabal update;
-       cabal install --only-dependencies --enable-tests --enable-benchmarks;;
-    esac
+       cabal install --only-dependencies --enable-tests --enable-benchmarks --force-reinstalls --ghc-options=-O0;;
+   esac
 
 script:
-  - |
-    case "$BUILD" in
-      stack)
-        stack --no-terminal test --bench --haddock --no-haddock-deps;;
-      cabal)
-        cabal install --enable-tests --enable-benchmarks;;
-    esac
+ - case "$BUILD" in
+     stack)
+       stack --no-terminal test --bench --haddock --no-haddock-deps;;
+     cabal)
+       cabal configure --enable-tests --enable-benchmarks;
+       cabal build;
+       cabal test;
+   esac
