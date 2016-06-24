@@ -57,11 +57,29 @@ before_install:
   - export PATH=$HOME/.cabal/bin:$HOME/.local/bin:$PATH
   - cd ..
 
-
 install:
-  - stack setup
-  - stack build
+  - echo "$(ghc --version) [$(ghc --print-project-git-commit-id 2> /dev/null || echo '?')]"
+  - case "$BUILD" in
+      stack)
+       stack --no-terminal --install-ghc test --bench --only-dependencies
+       ;;
+      cabal)
+       cabal --version;
+       travis_retry cabal update
+       cabal install --only-dependencies --enable-tests --enable-benchmarks
+       ;;
+    esac
+    set +ex
 
 script:
-  - stack test
-  - stack bench
+  - |
+    set -ex
+    case "$BUILD" in
+      stack)
+        stack --no-terminal test --bench --haddock --no-haddock-deps
+        ;;
+      cabal)
+        cabal install --enable-tests --enable-benchmarks
+        ;;
+    esac
+    set +ex
