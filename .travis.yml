@@ -54,6 +54,7 @@ before_install:
      cabal)
        export PATH=$HOME/.cabal/bin:/opt/ghc/$GHCVER/bin:/opt/cabal/$CABALVER/bin:$PATH;;
    esac
+ - chmod a+x .travis-setup.sh
  - ./.travis-setup.sh
 
 install:
