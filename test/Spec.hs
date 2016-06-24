@@ -19,7 +19,7 @@ import            Data.NBT.Encode
 import            Data.NBT.Types
 import qualified  Data.Text as T
 import            Data.Word
-import            Debug.Trace
+import qualified  Codec.Compression.GZip as GZip
 import            Test.Hspec
 import            Test.QuickCheck
 
@@ -64,7 +64,7 @@ instance Arbitrary NBT where
               0x07 -> TagByteArray <$> arbitrary <*> arbitrary
               0x08 -> TagString <$> arbitrary <*> arbitrary
               0x09 -> TagList <$> arbitrary <*> arbitrary
-              0x0a -> TagCompound <$> arbitrary <*> vectorOf (n `div` 20) arbitrary
+              0x0a -> TagCompound <$> arbitrary <*> vectorOf (n `div` 30) arbitrary
               0x0b -> TagIntArray <$> arbitrary <*> arbitrary
 
 instance Arbitrary NBTList where
@@ -83,7 +83,7 @@ instance Arbitrary NBTList where
               0x07 -> NBTList <$> return TypeByteArray <*> vectorOf (n `div` 20) (NTagByteArray <$> (arbitrary :: Gen (AU.UArray Int32 Int8)))
               0x08 -> NBTList <$> return TypeString <*> vectorOf i (NTagString <$> (arbitrary :: Gen T.Text))
               0x09 -> NBTList <$> return TypeList <*> vectorOf (n `div` 20) (NTagList <$> arbitrary)
-              0x0a -> NBTList <$> return TypeCompound <*> vectorOf (n `div` 20) (NTagCompound <$> vectorOf (n `div` 25) (arbitrary :: Gen NBT))
+              0x0a -> NBTList <$> return TypeCompound <*> vectorOf (n `div` 30) (NTagCompound <$> vectorOf (n `div` 30) (arbitrary :: Gen NBT))
               0x0b -> NBTList <$> return TypeIntArray <*> vectorOf (n `div` 20) (NTagIntArray <$> (arbitrary :: Gen (AU.UArray Int32 Int32)))
 
 checkIdentity :: Eq a => [a] -> (a -> Encode.Builder) -> (Decode.Parser a) -> Bool
@@ -151,3 +151,33 @@ main = hspec $ do
       it "Identity" $ property prop_CompoundIdentity
     context "IntArray" $ do
       it "Identity" $ property prop_IntArrayIdentity
+  describe "Decoding NBT formatted files" $ do
+    context "hello_world.nbt" $ do
+      it "Should return fully parsed Right" $ do
+        let possiblyDecoded =
+              fmap
+                (Decode.parseOnly decodeNBT)
+                (B.readFile "test/testdata/hello_world.nbt")
+        possiblyDecoded >>= (`shouldSatisfy` isRight)
+    context "level.dat" $ do
+      it "Should return fully parsed Right" $ do
+        let possiblyDecoded =
+              fmap
+                ((Decode.parseOnly decodeNBT)
+                  . BL.toStrict
+                  . GZip.decompress
+                  . BL.fromStrict
+                )
+                (B.readFile "test/testdata/level.dat")
+        possiblyDecoded >>= (`shouldSatisfy` isRight)
+    context "bigtest.nbt" $ do
+      it "Should return fully parsed Right" $ do
+        let possiblyDecoded =
+              fmap
+                ((Decode.parseOnly decodeNBT)
+                  . BL.toStrict
+                  . GZip.decompress
+                  . BL.fromStrict
+                )
+                (B.readFile "test/testdata/bigtest.nbt")
+        possiblyDecoded >>= (`shouldSatisfy` isRight)
