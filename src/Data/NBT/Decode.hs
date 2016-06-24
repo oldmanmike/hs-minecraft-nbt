@@ -1,5 +1,9 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
+#ifndef MIN_VERSION_base
+#define MIN_VERSION_base(x,y,z) 1
+#endif
 -------------------------------------------------------------------------------
 -- |
 -- Module       : Data.NBT.Decode
@@ -10,7 +14,6 @@
 -- Portability  : non-portable
 --
 -------------------------------------------------------------------------------
-
 module Data.NBT.Decode
   ( decodeNBT
   , decodeInt8
@@ -39,8 +42,11 @@ import            Data.Int
 import qualified  Data.Text as T
 import            Data.Text.Encoding
 import            Data.Word
-import            Debug.Trace
 import            Data.NBT.Types
+
+#if !MIN_VERSION_base(4,8,0)
+import Control.Applicative ((<$>),(<*>))
+#endif
 
 decodeNBT :: Decode.Parser NBT
 decodeNBT = do

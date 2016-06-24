@@ -64,7 +64,6 @@ benchmark minecraft-nbt-bench
                         base,
                         bytestring,
                         criterion,
-                        nbt,
                         text,
                         zlib
   ghc-options:          -Wall -O3

@@ -1,28 +1,79 @@
-language: haskell
+language: c
+
+sudo: false
 
 branches:
   only:
     - master
 
-sudo: required
 cache:
   directories:
-    - $HOME/.stack/
+    - $HOME/.ghc
+    - $HOME/.cabal
+    - $HOME/.stack
+
+matrix:
+  include:
+    - env: BUILD=cabal CABALVER=1.18 GHCVER=7.8.4
+      compiler: ": #GHC 7.8.4"
+      addons: {apt: {packages: [cabal-install-1.18,ghc-7.8.4], sources: [hvr-ghc]}}
+
+    - env: BUILD=cabal CABALVER=1.22 GHCVER=7.10.3
+      compiler: ": #GHC 7.10.3"
+      addons: {apt: {packages: [cabal-install-1.22,ghc-7.10.3], sources: [hvr-ghc]}}
+
+    - env: BUILD=cabal CABALVER=head GHCVER=head
+      compiler: ": #GHC head"
+      addons: {apt: {packages: [cabal-install-head,ghc-head], sources: [hvr-ghc]}}
+
+    - env: BUILD=stack GHCVER=7.8.4 STACK_YAML=stack-7.8.yaml
+      compiler: ": #stack 7.8.4"
+      addons: {apt: {packages: [cabal-install-head,ghc-7.8.4], sources: [hvr-ghc]}}
+
+    - env: BUILD=stack GHCVER=7.10.3 STACK_YAML=stack-7.10.yaml
+      compiler: ": #stack 7.10.3"
+      addons: {apt: {packages: [cabal-install-head,ghc-7.10.3], sources: [hvr-ghc]}}
+
+    - env: BUILD=stack GHCVER=head STACK_YAML=stack.yaml
+      compiler: ": #stack 8.0"
+      addons: {apt: {packages: [cabal-install-head,ghc-head], sources: [hvr-ghc]}}
+
+    - env: BUILD=stack STACK_YAML=stack.yaml
+      compiler: ": #stack 7.10.3 osx"
+      os: osx
+
+  allow_failures:
+    - env: BUILD=cabal CABALVER=head GHCVER=head
+    - env: BUILD=stack GHCVER=head STACK_YAML=stack.yaml
 
 before_install:
-  - mkdir -p ~/.local/bin
-  - export PATH=~/.local/bin:$PATH
-  - travis_retry wget https://github.com/commercialhaskell/stack/releases/download/v1.1.2/stack-1.1.2-linux-x86_64.tar.gz
-  - tar xzf stack-1.1.2-linux-x86_64.tar.gz
-  - cd stack-1.1.2-linux-x86_64/
-  - cp ./stack ~/.local/bin/
-  - chmod a+x ~/.local/bin/stack
-
+ - unset CC
+ - case "$BUILD" in
+     stack)
+       export PATH=$HOME/.local/bin:/opt/ghc/$GHCVER/bin:$PATH;;
+     cabal)
+       export PATH=$HOME/.cabal/bin:/opt/ghc/$GHCVER/bin:/opt/cabal/$CABALVER/bin:$PATH;;
+   esac
+ - chmod a+x .travis-setup.sh
+ - ./.travis-setup.sh
 
 install:
-  - stack setup
-  - stack build
+ - echo "$(ghc --version) [$(ghc --print-project-git-commit-id 2> /dev/null || echo '?')]"
+ - case "$BUILD" in
+     stack)
+       stack --no-terminal test --only-dependencies;;
+     cabal)
+       cabal --version;
+       travis_retry cabal update;
+       cabal install --only-dependencies --enable-tests --enable-benchmarks --force-reinstalls --ghc-options=-O0;;
+   esac
 
 script:
-  - stack test
-  - stack bench
+ - case "$BUILD" in
+     stack)
+       stack --no-terminal test --bench --haddock --no-haddock-deps;;
+     cabal)
+       cabal configure --enable-tests --enable-benchmarks;
+       cabal build;
+       cabal test;
+   esac
