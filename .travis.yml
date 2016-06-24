@@ -4,7 +4,7 @@ sudo: false
 
 branches:
   only:
-    - travis-tweaking
+    - master
 
 cache:
   directories:
