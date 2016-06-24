@@ -1,5 +1,11 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE FlexibleInstances #-}
+
+#ifndef MIN_VERSION_base
+#define MIN_VERSION_base(x,y,z) 1
+#endif
+
 import qualified  Data.Array.IArray as A
 import qualified  Data.Array.Unboxed as AU
 import qualified  Data.Attoparsec.ByteString as Decode
@@ -16,6 +22,10 @@ import            Data.Word
 import            Debug.Trace
 import            Test.Hspec
 import            Test.QuickCheck
+
+#if !MIN_VERSION_base(4,8,0)
+import Control.Applicative ((<$>),(<*>))
+#endif
 
 instance Arbitrary T.Text where
   arbitrary = fmap T.pack (arbitrary :: Gen String)
