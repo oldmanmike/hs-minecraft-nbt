@@ -1,0 +1,6 @@
+resolver: lts-2.22
+packages:
+- '.'
+extra-deps: [nbt-0.6]
+flags: {}
+extra-package-dbs: []
