@@ -66,19 +66,17 @@ decodeNBT = do
     0x00 -> fail ("Could not match tag type: " ++ show tagTypeByte)
 
 decodeNBT' :: TagType -> Decode.Parser NamelessNBT
-decodeNBT' t = do
-  case t of
-    TypeByte -> NTagByte <$> decodeInt8
-    TypeShort -> NTagShort <$> decodeInt16BE
-    TypeInt -> NTagInt <$> decodeInt32BE
-    TypeLong -> NTagLong <$> decodeInt64BE
-    TypeFloat -> NTagFloat <$> decodeFloatBE
-    TypeDouble -> NTagDouble <$> decodeDoubleBE
-    TypeByteArray -> NTagByteArray <$> decodeByteArray
-    TypeString -> NTagString <$> decodeText
-    TypeList -> NTagList <$> decodeList
-    TypeCompound -> NTagCompound <$> decodeCompound
-    TypeIntArray -> NTagIntArray <$> decodeIntArray
+decodeNBT' TypeByte       = NTagByte      <$> decodeInt8
+decodeNBT' TypeShort      = NTagShort     <$> decodeInt16BE
+decodeNBT' TypeInt        = NTagInt       <$> decodeInt32BE
+decodeNBT' TypeLong       = NTagLong      <$> decodeInt64BE
+decodeNBT' TypeFloat      = NTagFloat     <$> decodeFloatBE
+decodeNBT' TypeDouble     = NTagDouble    <$> decodeDoubleBE
+decodeNBT' TypeByteArray  = NTagByteArray <$> decodeByteArray
+decodeNBT' TypeString     = NTagString    <$> decodeText
+decodeNBT' TypeList       = NTagList      <$> decodeList
+decodeNBT' TypeCompound   = NTagCompound  <$> decodeCompound
+decodeNBT' TypeIntArray   = NTagIntArray  <$> decodeIntArray
 
 decodeWord16BE :: Decode.Parser Word16
 decodeWord16BE = do
@@ -167,9 +165,7 @@ decodeByteArray = do
 decodeText :: Decode.Parser T.Text
 decodeText = do
   ln <- fmap fromIntegral decodeInt16BE
-  if ln /= 0
-    then fmap decodeUtf8 (Decode.take ln)
-    else return ""
+  fmap decodeUtf8 (Decode.take ln)
 
 decodeList :: Decode.Parser NBTList
 decodeList = do
