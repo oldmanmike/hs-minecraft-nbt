@@ -20,6 +20,9 @@ module Data.NBT.Decode
   , decodeInt16BE
   , decodeInt32BE
   , decodeInt64BE
+  , decodeWord16BE
+  , decodeWord32BE
+  , decodeWord64BE
   , decodeFloatBE
   , decodeDoubleBE
   , decodeByteArray

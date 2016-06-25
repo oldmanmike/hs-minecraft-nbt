@@ -17,8 +17,7 @@ module Data.NBT.Types
   ) where
 
 import            Control.Applicative
-import            Data.Array.IArray (Array)
-import            Data.Array.Unboxed (UArray)
+import            Data.Data
 import            Data.Int
 import qualified  Data.Text as T
 import            Data.Typeable
@@ -36,7 +35,7 @@ data NBT
   | TagList       T.Text NBTList
   | TagCompound   T.Text [NBT]
   | TagIntArray   T.Text (U.Vector Int32)
-  deriving (Show,Eq,Typeable)
+  deriving (Show,Read,Eq,Typeable,Data)
 
 data NamelessNBT
   = NTagByte       Int8
@@ -50,9 +49,9 @@ data NamelessNBT
   | NTagList       NBTList
   | NTagCompound   [NBT]
   | NTagIntArray   (U.Vector Int32)
-  deriving (Show,Eq,Typeable)
+  deriving (Show,Read,Eq,Typeable,Data)
 
-data NBTList = NBTList TagType [NamelessNBT] deriving (Show,Eq)
+data NBTList = NBTList TagType [NamelessNBT] deriving (Show,Read,Eq,Typeable,Data)
 
 data TagType
   = TypeEnd
@@ -67,4 +66,4 @@ data TagType
   | TypeList
   | TypeCompound
   | TypeIntArray
-  deriving (Show,Eq,Enum)
+  deriving (Show,Read,Eq,Enum,Typeable,Data)

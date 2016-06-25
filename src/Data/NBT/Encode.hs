@@ -17,8 +17,6 @@ module Data.NBT.Encode
   , encodeIntArray
   ) where
 
-import qualified  Data.Array.IArray as A
-import qualified  Data.Array.Unboxed as AU
 import qualified  Data.ByteString as B
 import qualified  Data.ByteString.Builder as Encode
 import            Data.Int
