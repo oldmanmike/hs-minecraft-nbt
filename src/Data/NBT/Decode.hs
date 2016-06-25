@@ -160,8 +160,7 @@ cast x = newArray (0 :: Int, 0) x >>= castSTUArray >>= flip readArray 0
 decodeByteArray :: Decode.Parser (U.Vector Int8)
 decodeByteArray = do
   i <- decodeInt32BE
-  lst <- Decode.count (fromEnum i) decodeInt8
-  return $ U.fromList lst
+  U.replicateM (fromEnum i) decodeInt8
 
 decodeText :: Decode.Parser T.Text
 decodeText = do
@@ -181,5 +180,4 @@ decodeCompound = Decode.manyTill' decodeNBT (Decode.word8 0x00)
 decodeIntArray :: Decode.Parser (U.Vector Int32)
 decodeIntArray = do
   i <- decodeInt32BE
-  lst <- Decode.count (fromEnum i) decodeInt32BE
-  return $ U.fromList lst
+  U.replicateM (fromEnum i) decodeInt32BE

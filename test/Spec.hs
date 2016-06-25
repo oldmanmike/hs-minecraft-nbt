@@ -18,6 +18,7 @@ import            Data.NBT.Decode
 import            Data.NBT.Encode
 import            Data.NBT.Types
 import qualified  Data.Text as T
+import qualified  Data.Vector.Unboxed as U
 import            Data.Word
 import qualified  Codec.Compression.GZip as GZip
 import            Test.Hspec
@@ -36,17 +37,17 @@ instance Arbitrary (A.Array Int32 Int8) where
     e <- vectorOf (fromEnum ln) arbitrary
     return $ A.array (0,(ln-1)) (zip (A.range (0,(ln-1))) e)
 
-instance Arbitrary (AU.UArray Int32 Int32) where
+instance Arbitrary (U.Vector Int32) where
   arbitrary = do
     ln <- choose (0,10) :: Gen Int32
     e <- vectorOf (fromEnum ln) arbitrary
-    return $ AU.array (0,(ln-1)) (zip (AU.range (0,(ln-1))) e)
+    return $ U.fromList e
 
-instance Arbitrary (AU.UArray Int32 Int8) where
+instance Arbitrary (U.Vector Int8) where
   arbitrary = do
     ln <- choose (0,10) :: Gen Int32
     e <- vectorOf (fromEnum ln) arbitrary
-    return $ AU.array (0,(ln-1)) (zip (AU.range (0,(ln-1))) e)
+    return $ U.fromList e
 
 instance Arbitrary NBT where
   arbitrary = sized nbt'
@@ -80,11 +81,11 @@ instance Arbitrary NBTList where
               0x04 -> NBTList <$> return TypeLong <*> vectorOf i (NTagLong <$> (arbitrary :: Gen Int64))
               0x05 -> NBTList <$> return TypeFloat <*> vectorOf i (NTagFloat <$> (arbitrary :: Gen Float))
               0x06 -> NBTList <$> return TypeDouble <*> vectorOf i (NTagDouble <$> (arbitrary :: Gen Double))
-              0x07 -> NBTList <$> return TypeByteArray <*> vectorOf (n `div` 20) (NTagByteArray <$> (arbitrary :: Gen (AU.UArray Int32 Int8)))
+              0x07 -> NBTList <$> return TypeByteArray <*> vectorOf (n `div` 20) (NTagByteArray <$> (arbitrary :: Gen (U.Vector Int8)))
               0x08 -> NBTList <$> return TypeString <*> vectorOf i (NTagString <$> (arbitrary :: Gen T.Text))
               0x09 -> NBTList <$> return TypeList <*> vectorOf (n `div` 20) (NTagList <$> arbitrary)
               0x0a -> NBTList <$> return TypeCompound <*> vectorOf (n `div` 30) (NTagCompound <$> vectorOf (n `div` 30) (arbitrary :: Gen NBT))
-              0x0b -> NBTList <$> return TypeIntArray <*> vectorOf (n `div` 20) (NTagIntArray <$> (arbitrary :: Gen (AU.UArray Int32 Int32)))
+              0x0b -> NBTList <$> return TypeIntArray <*> vectorOf (n `div` 20) (NTagIntArray <$> (arbitrary :: Gen (U.Vector Int32)))
 
 checkIdentity :: Eq a => [a] -> (a -> Encode.Builder) -> (Decode.Parser a) -> Bool
 checkIdentity [] _ _ = True
@@ -111,7 +112,7 @@ prop_FloatIdentity lst = checkIdentity lst Encode.floatBE decodeFloatBE
 prop_DoubleIdentity :: [Double] -> Bool
 prop_DoubleIdentity lst = checkIdentity lst Encode.doubleBE decodeDoubleBE
 
-prop_ByteArrayIdentity :: [(AU.UArray Int32 Int8)] -> Bool
+prop_ByteArrayIdentity :: [(U.Vector Int8)] -> Bool
 prop_ByteArrayIdentity lst = checkIdentity lst encodeByteArray decodeByteArray
 
 prop_StringIdentity :: [T.Text] -> Bool
@@ -123,7 +124,7 @@ prop_ListIdentity lst = checkIdentity lst encodeList decodeList
 prop_CompoundIdentity :: [[NBT]] -> Bool
 prop_CompoundIdentity lst = checkIdentity lst encodeCompound decodeCompound
 
-prop_IntArrayIdentity :: [(AU.UArray Int32 Int32)] -> Bool
+prop_IntArrayIdentity :: [(U.Vector Int32)] -> Bool
 prop_IntArrayIdentity lst = checkIdentity lst encodeIntArray decodeIntArray
 
 main :: IO ()
