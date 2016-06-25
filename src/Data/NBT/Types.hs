@@ -22,6 +22,7 @@ import            Data.Array.Unboxed (UArray)
 import            Data.Int
 import qualified  Data.Text as T
 import            Data.Typeable
+import qualified  Data.Vector.Unboxed as U
 
 data NBT
   = TagByte       T.Text Int8
@@ -30,11 +31,11 @@ data NBT
   | TagLong       T.Text Int64
   | TagFloat      T.Text Float
   | TagDouble     T.Text Double
-  | TagByteArray  T.Text (UArray Int32 Int8)
+  | TagByteArray  T.Text (U.Vector Int8) --(UArray Int32 Int8)
   | TagString     T.Text T.Text
   | TagList       T.Text NBTList
   | TagCompound   T.Text [NBT]
-  | TagIntArray   T.Text (UArray Int32 Int32)
+  | TagIntArray   T.Text (U.Vector Int32) --(UArray Int32 Int32)
   deriving (Show,Eq,Typeable)
 
 data NamelessNBT
@@ -44,11 +45,11 @@ data NamelessNBT
   | NTagLong       Int64
   | NTagFloat      Float
   | NTagDouble     Double
-  | NTagByteArray  (UArray Int32 Int8)
+  | NTagByteArray  (U.Vector Int8) -- (UArray Int32 Int8)
   | NTagString     T.Text
   | NTagList       NBTList
   | NTagCompound   [NBT]
-  | NTagIntArray   (UArray Int32 Int32)
+  | NTagIntArray   (U.Vector Int32) -- (UArray Int32 Int32)
   deriving (Show,Eq,Typeable)
 
 data NBTList = NBTList TagType [NamelessNBT] deriving (Show,Eq)

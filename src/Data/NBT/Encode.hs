@@ -8,7 +8,6 @@
 -- Portability  : non-portable
 --
 -------------------------------------------------------------------------------
-
 module Data.NBT.Encode
   ( encodeNBT
   , encodeText
@@ -28,6 +27,7 @@ import            Data.Monoid
 import qualified  Data.Text as T
 import            Data.Text.Encoding
 import            Data.Word
+import qualified  Data.Vector.Unboxed as U
 
 import            Data.NBT.Types
 
@@ -100,10 +100,10 @@ encodeNBT' (NTagList payload)       = encodeList payload
 encodeNBT' (NTagCompound payload)   = encodeCompound payload
 encodeNBT' (NTagIntArray payload)   = encodeIntArray payload
 
-encodeByteArray :: (AU.UArray Int32 Int8) -> Encode.Builder
+encodeByteArray :: (U.Vector Int8) -> Encode.Builder
 encodeByteArray payload =
-  (Encode.int32BE $ (\(a,b) -> toEnum . fromEnum $ AU.rangeSize (a,b)) $ (AU.bounds payload))
-  <> (foldl' (<>) mempty (fmap Encode.int8 (AU.elems payload)))
+  (Encode.int32BE . toEnum . U.length $ payload)
+  <> (U.foldl' (\a b -> a <> Encode.int8 b) mempty payload)
 
 encodeText :: T.Text -> Encode.Builder
 encodeText t =
@@ -121,7 +121,7 @@ encodeList (NBTList t payload) =
 encodeCompound :: [NBT] -> Encode.Builder
 encodeCompound payload = foldr (<>) (Encode.word8 0x00) (fmap encodeNBT payload)
 
-encodeIntArray :: (AU.UArray Int32 Int32) -> Encode.Builder
-encodeIntArray arr =
-  (Encode.int32BE . (\(a,b) -> toEnum . fromEnum $ AU.rangeSize (a,b)) $ (A.bounds arr))
-  <> (foldl' (<>) mempty (fmap Encode.int32BE (AU.elems arr)))
+encodeIntArray :: (U.Vector Int32) -> Encode.Builder
+encodeIntArray payload =
+  (Encode.int32BE . toEnum . U.length $ payload)
+  <> (U.foldl' (\a b -> a <> Encode.int32BE b) mempty payload)

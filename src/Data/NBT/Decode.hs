@@ -41,6 +41,7 @@ import qualified  Data.ByteString.Unsafe as B
 import            Data.Int
 import qualified  Data.Text as T
 import            Data.Text.Encoding
+import qualified  Data.Vector.Unboxed as U
 import            Data.Word
 import            Data.NBT.Types
 
@@ -156,11 +157,11 @@ cast :: (MArray (STUArray s) a (ST s),
          MArray (STUArray s) b (ST s)) => a -> ST s b
 cast x = newArray (0 :: Int, 0) x >>= castSTUArray >>= flip readArray 0
 
-decodeByteArray :: Decode.Parser (UArray Int32 Int8)
+decodeByteArray :: Decode.Parser (U.Vector Int8)
 decodeByteArray = do
   i <- decodeInt32BE
   lst <- Decode.count (fromEnum i) decodeInt8
-  return $ array (0,(i-1)) (zip (range (0,(i-1))) lst)
+  return $ U.fromList lst
 
 decodeText :: Decode.Parser T.Text
 decodeText = do
@@ -177,8 +178,8 @@ decodeList = do
 decodeCompound :: Decode.Parser [NBT]
 decodeCompound = Decode.manyTill' decodeNBT (Decode.word8 0x00)
 
-decodeIntArray :: Decode.Parser (UArray Int32 Int32)
+decodeIntArray :: Decode.Parser (U.Vector Int32)
 decodeIntArray = do
   i <- decodeInt32BE
   lst <- Decode.count (fromEnum i) decodeInt32BE
-  return $ array (0,(i-1)) (zip (range (0,(i-1))) lst)
+  return $ U.fromList lst
