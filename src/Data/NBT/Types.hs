@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 -------------------------------------------------------------------------------
 -- |
@@ -17,11 +18,13 @@ module Data.NBT.Types
   ) where
 
 import            Control.Applicative
+import            Control.DeepSeq
 import            Data.Data
 import            Data.Int
 import qualified  Data.Text as T
 import            Data.Typeable
 import qualified  Data.Vector.Unboxed as U
+import            GHC.Generics
 
 data NBT
   = TagByte       T.Text Int8
@@ -35,7 +38,9 @@ data NBT
   | TagList       T.Text NBTList
   | TagCompound   T.Text [NBT]
   | TagIntArray   T.Text (U.Vector Int32)
-  deriving (Show,Read,Eq,Typeable,Data)
+  deriving (Show,Read,Eq,Typeable,Data,Generic)
+
+instance NFData NBT
 
 data NamelessNBT
   = NTagByte       Int8
@@ -49,9 +54,13 @@ data NamelessNBT
   | NTagList       NBTList
   | NTagCompound   [NBT]
   | NTagIntArray   (U.Vector Int32)
-  deriving (Show,Read,Eq,Typeable,Data)
+  deriving (Show,Read,Eq,Typeable,Data,Generic)
 
-data NBTList = NBTList TagType [NamelessNBT] deriving (Show,Read,Eq,Typeable,Data)
+instance NFData NamelessNBT
+
+data NBTList = NBTList TagType [NamelessNBT] deriving (Show,Read,Eq,Typeable,Data,Generic)
+
+instance NFData NBTList
 
 data TagType
   = TypeEnd
@@ -66,4 +75,6 @@ data TagType
   | TypeList
   | TypeCompound
   | TypeIntArray
-  deriving (Show,Read,Eq,Enum,Typeable,Data)
+  deriving (Show,Read,Eq,Enum,Typeable,Data,Generic)
+
+instance NFData TagType

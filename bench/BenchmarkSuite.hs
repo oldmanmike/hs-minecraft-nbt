@@ -16,44 +16,44 @@ main = do
   let levelDat = BL.toStrict $ GZip.decompress (BL.fromStrict rawLevel)
   defaultMain
     [ bgroup "decodeNBT"
-      [ bench "tiny" $ whnf (Decode.parseOnly decodeNBT) tinyDat
-      , bench "big" $ whnf (Decode.parseOnly decodeNBT) bigDat
-      , bench "level" $ whnf (Decode.parseOnly decodeNBT) levelDat
+      [ bench "tiny" $ nf (Decode.parseOnly decodeNBT) tinyDat
+      , bench "big" $ nf (Decode.parseOnly decodeNBT) bigDat
+      , bench "level" $ nf (Decode.parseOnly decodeNBT) levelDat
       ]
     , bgroup "decodeInt8"
-      [ bench "100" $ whnf (Decode.parseOnly decodeInt8) (B.replicate 100 0)
-      , bench "1000" $ whnf (Decode.parseOnly decodeInt8) (B.replicate 1000 0)
-      , bench "10000" $ whnf (Decode.parseOnly decodeInt8) (B.replicate 10000 0)
+      [ bench "100" $ nf (Decode.parseOnly decodeInt8) (B.replicate 100 0)
+      , bench "1000" $ nf (Decode.parseOnly decodeInt8) (B.replicate 1000 0)
+      , bench "10000" $ nf (Decode.parseOnly decodeInt8) (B.replicate 10000 0)
       ]
     , bgroup "decodeInt16BE"
-      [ bench "100" $ whnf (Decode.parseOnly decodeInt16BE) (B.replicate (100 * 2) 0)
-      , bench "1000" $ whnf (Decode.parseOnly decodeInt16BE) (B.replicate (1000 * 2) 0)
-      , bench "10000" $ whnf (Decode.parseOnly decodeInt16BE) (B.replicate (10000 * 2) 0)
+      [ bench "100" $ nf (Decode.parseOnly decodeInt16BE) (B.replicate (100 * 2) 0)
+      , bench "1000" $ nf (Decode.parseOnly decodeInt16BE) (B.replicate (1000 * 2) 0)
+      , bench "10000" $ nf (Decode.parseOnly decodeInt16BE) (B.replicate (10000 * 2) 0)
       ]
     , bgroup "decodeInt32BE"
-      [ bench "100" $ whnf (Decode.parseOnly decodeInt32BE) (B.replicate (100 * 4) 0)
-      , bench "1000" $ whnf (Decode.parseOnly decodeInt32BE) (B.replicate (1000 * 4) 0)
-      , bench "10000" $ whnf (Decode.parseOnly decodeInt32BE) (B.replicate (10000 * 4) 0)
+      [ bench "100" $ nf (Decode.parseOnly decodeInt32BE) (B.replicate (100 * 4) 0)
+      , bench "1000" $ nf (Decode.parseOnly decodeInt32BE) (B.replicate (1000 * 4) 0)
+      , bench "10000" $ nf (Decode.parseOnly decodeInt32BE) (B.replicate (10000 * 4) 0)
       ]
     , bgroup "decodeInt64BE"
-      [ bench "100" $ whnf (Decode.parseOnly decodeInt64BE) (B.replicate (100 * 8) 0)
-      , bench "1000" $ whnf (Decode.parseOnly decodeInt64BE) (B.replicate (1000 * 8) 0)
-      , bench "10000" $ whnf (Decode.parseOnly decodeInt64BE) (B.replicate (10000 * 8) 0)
+      [ bench "100" $ nf (Decode.parseOnly decodeInt64BE) (B.replicate (100 * 8) 0)
+      , bench "1000" $ nf (Decode.parseOnly decodeInt64BE) (B.replicate (1000 * 8) 0)
+      , bench "10000" $ nf (Decode.parseOnly decodeInt64BE) (B.replicate (10000 * 8) 0)
       ]
     , bgroup "decodeWord16BE"
-      [ bench "100" $ whnf (Decode.parseOnly decodeWord16BE) (B.replicate (100 * 2) 0)
-      , bench "1000" $ whnf (Decode.parseOnly decodeWord16BE) (B.replicate (1000 * 2) 0)
-      , bench "10000" $ whnf (Decode.parseOnly decodeWord16BE) (B.replicate (10000 * 2) 0)
+      [ bench "100" $ nf (Decode.parseOnly decodeWord16BE) (B.replicate (100 * 2) 0)
+      , bench "1000" $ nf (Decode.parseOnly decodeWord16BE) (B.replicate (1000 * 2) 0)
+      , bench "10000" $ nf (Decode.parseOnly decodeWord16BE) (B.replicate (10000 * 2) 0)
       ]
     , bgroup "decodeWord32BE"
-      [ bench "100" $ whnf (Decode.parseOnly decodeWord32BE) (B.replicate (100 * 4) 0)
-      , bench "1000" $ whnf (Decode.parseOnly decodeWord32BE) (B.replicate (1000 * 4) 0)
-      , bench "10000" $ whnf (Decode.parseOnly decodeWord32BE) (B.replicate (10000 * 4) 0)
+      [ bench "100" $ nf (Decode.parseOnly decodeWord32BE) (B.replicate (100 * 4) 0)
+      , bench "1000" $ nf (Decode.parseOnly decodeWord32BE) (B.replicate (1000 * 4) 0)
+      , bench "10000" $ nf (Decode.parseOnly decodeWord32BE) (B.replicate (10000 * 4) 0)
       ]
     , bgroup "decodeWord64BE"
-      [ bench "100" $ whnf (Decode.parseOnly decodeWord64BE) (B.replicate (100 * 8) 0)
-      , bench "1000" $ whnf (Decode.parseOnly decodeWord64BE) (B.replicate (1000 * 8) 0)
-      , bench "10000" $ whnf (Decode.parseOnly decodeWord64BE) (B.replicate (10000 * 8) 0)
+      [ bench "100" $ nf (Decode.parseOnly decodeWord64BE) (B.replicate (100 * 8) 0)
+      , bench "1000" $ nf (Decode.parseOnly decodeWord64BE) (B.replicate (1000 * 8) 0)
+      , bench "10000" $ nf (Decode.parseOnly decodeWord64BE) (B.replicate (10000 * 8) 0)
       ]
       {-
     , bgroup "decodeFloatBE" []
