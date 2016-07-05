@@ -67,7 +67,9 @@ decodeNBT = do
     0x09 -> TagList <$> decodeText <*> decodeList
     0x0a -> TagCompound <$> decodeText <*> decodeCompound
     0x0b -> TagIntArray <$> decodeText <*> decodeIntArray
-    0x00 -> fail ("Could not match tag type: " ++ show tagTypeByte)
+    0x00 -> fail "Error: Invalid END tag!"
+    _ -> fail ("Could not match tag type: " ++ show tagTypeByte)
+
 
 decodeNBT' :: TagType -> Decode.Parser NamelessNBT
 decodeNBT' TypeByte       = NTagByte      <$> decodeInt8
